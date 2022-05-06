@@ -71,36 +71,35 @@ This project
    Then, I tried to train a model that have the points marked as 1 laying on empty 28*28 zero array, then use similar layers in original model, to creare the adversarial model. 
 
     ```
-      Model output (None, 28, 28, 1)
-      Model: "sequential"
+      Model: "sequential_21"
       _________________________________________________________________
        Layer (type)                Output Shape              Param #   
       =================================================================
-       conv2d (Conv2D)             (None, 26, 26, 32)        320       
+       conv2d_31 (Conv2D)          (None, 25, 25, 32)        544       
                                                                        
-       max_pooling2d (MaxPooling2D  (None, 13, 13, 32)       0         
-       )                                                               
+       max_pooling2d_40 (MaxPoolin  (None, 12, 12, 32)       0         
+       g2D)                                                            
                                                                        
-       flatten (Flatten)           (None, 5408)              0         
+       flatten_22 (Flatten)        (None, 4608)              0         
                                                                        
-       dense (Dense)               (None, 784)               4240656   
+       dropout_20 (Dropout)        (None, 4608)              0         
                                                                        
-       reshape (Reshape)           (None, 28, 28, 1)         0         
+       dense_19 (Dense)            (None, 784)               3613456   
+                                                                       
+       reshape_14 (Reshape)        (None, 28, 28, 1)         0         
                                                                        
       =================================================================
-      Total params: 4,240,976
-      Trainable params: 4,240,976
+      Total params: 3,614,000
+      Trainable params: 3,614,000
       Non-trainable params: 0
     ```
     
-    And it turned out that this approach works, and the accuracy is relatively high than training on the points
-
     ```
     Epoch 1/5
       44/44 [==============================] - 1s 27ms/step - loss: 0.0299 - accuracy: 0.9793 - val_loss: 0.0073 - val_accuracy: 0.9927
     ```
 
-    I doubt that the convention is (almost) linear and in fact don't need so many layers.
+    I got help from [Sida Zhu](https://github.com/teamclouday) on this part
 
 5. To create adversarial examples
     
@@ -109,7 +108,58 @@ This project
     After test on around 2000 images, I found that the average for such multiple factor is 276, and most of the image will share a similar shape for attack. If we feed the output from the adversarial model to heatmap, we can see that at which position attack will more likely happen (at least the model think so)
     For example, if we have a image that looks like this  
     <img src="assets/output1.png"> <img src="assets/output.png"><img src="assets/output2.png">  
-    
-    And the image shown above is originall recognized as 4, now it is recognized as 9.
+    Original  5 Now  9  
+    <img src="assets/output4.png"> <img src="assets/output3.png"><img src="assets/output5.png">  
+    Original  6 Now  8
+
 
 6. Train distillation model
+
+    Based on the paper [Distillation as a Defense to Adversarial Perturbations against Deep Neural Networks](https://arxiv.org/abs/1511.04508)  
+    I first processed the y_train predicted by original model (10*1 array such as [1.8107850e-11 2.7473806e-07 4.2569755e-07 5.5906617e-06 3.4349390e-13 3.9189835e-11 1.4915251e-17 9.9999321e-01 1.0969632e-07 3.4083357e-07])
+
+    ```
+      Model: "sequential_38"
+      _________________________________________________________________
+       Layer (type)                Output Shape              Param #   
+      =================================================================
+       conv2d_61 (Conv2D)          (None, 26, 26, 32)        320       
+                                                                       
+       max_pooling2d_70 (MaxPoolin  (None, 13, 13, 32)       0         
+       g2D)                                                            
+                                                                       
+       conv2d_62 (Conv2D)          (None, 11, 11, 64)        18496     
+                                                                       
+       max_pooling2d_71 (MaxPoolin  (None, 5, 5, 64)         0         
+       g2D)                                                            
+                                                                       
+       flatten_41 (Flatten)        (None, 1600)              0         
+                                                                       
+       dropout_36 (Dropout)        (None, 1600)              0         
+                                                                       
+       dense_39 (Dense)            (None, 10)                16010     
+                                                                       
+      =================================================================
+      Total params: 34,826
+      Trainable params: 34,826
+      Non-trainable params: 0
+    ```
+
+
+7. Attack the distillation model
+
+    Recall the multiply_factor that controls the points added to the attacked image, this number reflects how `hard` to attack the model. As we have trained the distillation model, we want to validate that whether te proposed distillation model is more robust against attacks, so we randomly check what is the multiply_factor to change the prediction of original model and distillation model, compare the multiply_factor we can see the robustness of these 2 models.  
+    For example, the original image  
+    <img src="assets/output6.png" height=150px> 
+    
+    the heatmap for attack points  
+    <img src="assets/output7.png" height=200px>
+    
+    The minimum multiply_factor to attack the original model is shown on left, and the minimum multiply_factor to attack the distillation model is shown on the right side  
+    <img src="assets/output8.png" height=150px><img src="assets/output9.png" height=150px>    
+
+    We can see it need few more points to attack the distillation model
+
+    Then, we run tests on these 2 models and check the average multiply_factor for original model and distillation model.
+
+    And check 600 random images out of the train images, that the average factor to mislead the original model is 23, while the average for distillation model is 27, which shows the distillation model has better robustness than the original model
