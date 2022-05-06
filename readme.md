@@ -150,7 +150,7 @@ This project
 
     Recall the multiply_factor that controls the points added to the attacked image, this number reflects how `hard` to attack the model. As we have trained the distillation model, we want to validate that whether te proposed distillation model is more robust against attacks, so we randomly check what is the multiply_factor to change the prediction of original model and distillation model, compare the multiply_factor we can see the robustness of these 2 models.  
     For example, the original image  
-    ![](assets/output5.png)
+    ![](assets/output6.png)
 
     the heatmap for attack points  
     ![](assets/output7.png)
