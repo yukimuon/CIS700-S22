@@ -37,10 +37,9 @@ When we have x points, we pin P1 to be arbitrary one of these x points, and iter
 2.  There should be some relationship between such security on machine learning and the privacy, but I am not going to dig deeper into this
 3.  The vulnerable positions for each number  
 
-May need a simple model to predict the position, or even just matrix 
-<img src="assets/figure1.png" height="50px">
+May need a simple model to predict the position, or even just matrix  
 
-4.  Inspect vulnerable position in each layer output  
+1.  Inspect vulnerable position in each layer output  
 Such as  
 [[...][...][...]...]  
 -> [[...][...]]  

@@ -99,17 +99,17 @@ This project
       44/44 [==============================] - 1s 27ms/step - loss: 0.0299 - accuracy: 0.9793 - val_loss: 0.0073 - val_accuracy: 0.9927
     ```
 
-    I got help from [Sida Zhu](https://github.com/teamclouday) on this part
-
 5. To create adversarial examples
     
     The output of such model o a 28*28*1 array is a 28*28*1 array, and the positions range from 0-1, so we need a factor that multiple the position. For example, assume we have 0.13 at position (2,5), we set the multiple to be 20, then it become 2.6 at point (2,5), we limit each point at max 1, so point (2,5) become 1, other points if less than 1 we change that point to 0 (by convert each point to type int). Test run the images and see how big `multiple_factor` will change the recognition from original model, the higher this factor is, our model will need more points to mislead the original model.
 
     After test on around 2000 images, I found that the average for such multiple factor is 276, and most of the image will share a similar shape for attack. If we feed the output from the adversarial model to heatmap, we can see that at which position attack will more likely happen (at least the model think so)
     For example, if we have a image that looks like this  
-    <img src="assets/output1.png"> <img src="assets/output.png"><img src="assets/output2.png">  
+    ![](assets/output1.png) ![](assets/output.png)  
+    ![](assets/output2.png)  
     Original  5 Now  9  
-    <img src="assets/output4.png"> <img src="assets/output3.png"><img src="assets/output5.png">  
+    ![](assets/output4.png) ![](assets/output3.png)   
+    ![](assets/output5.png)  
     Original  6 Now  8
 
 
@@ -150,16 +150,25 @@ This project
 
     Recall the multiply_factor that controls the points added to the attacked image, this number reflects how `hard` to attack the model. As we have trained the distillation model, we want to validate that whether te proposed distillation model is more robust against attacks, so we randomly check what is the multiply_factor to change the prediction of original model and distillation model, compare the multiply_factor we can see the robustness of these 2 models.  
     For example, the original image  
-    <img src="assets/output6.png" height=150px> 
-    
+    ![](assets/output5.png)
+
     the heatmap for attack points  
-    <img src="assets/output7.png" height=200px>
+    ![](assets/output7.png)
     
     The minimum multiply_factor to attack the original model is shown on left, and the minimum multiply_factor to attack the distillation model is shown on the right side  
-    <img src="assets/output8.png" height=150px><img src="assets/output9.png" height=150px>    
+    ![](assets/output8.png)![](assets/output9.png)
 
     We can see it need few more points to attack the distillation model
 
     Then, we run tests on these 2 models and check the average multiply_factor for original model and distillation model.
 
     And check 600 random images out of the train images, that the average factor to mislead the original model is 23, while the average for distillation model is 27, which shows the distillation model has better robustness than the original model
+
+
+References:
+[1] Papernot, Nicolas, et al. "Distillation as a defense to adversarial perturbations against deep neural networks." 2016 IEEE symposium on security and privacy (SP). IEEE, 2016.  
+[2] Athalye, Anish, Nicholas Carlini, and David Wagner. "Obfuscated gradients give a false sense of security: Circumventing defenses to adversarial examples." International conference on machine learning. PMLR, 2018.  
+[3] MNIST Adversarial Examples Challenge https://github.com/MadryLab/mnist_challenge  
+[4] mnist-adversary https://github.com/dguliani/mnist-adversary  
+[5] Simple MNIST convnet https://keras.io/examples/vision/mnist_convnet/  
+[6] Help from my friend Sida Zhu  
